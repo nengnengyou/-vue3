@@ -5,20 +5,24 @@
         <h3 class="title">用户登录</h3>
       </div>
 
-      <el-form-item prop="name">
+      <el-form-item prop="username">
         <!-- <el-icon :size="20" :color="color" class="svg-container"
           ><edit
         /></el-icon> -->
         <svg-icon icon="user" class="svg-container"></svg-icon>
 
-        <el-input v-model="form.name"></el-input>
+        <el-input v-model="form.username"></el-input>
       </el-form-item>
       <el-form-item prop="password">
         <!-- <el-icon :size="20" :color="color" class="svg-container"
           ><edit
         /></el-icon> -->
         <svg-icon icon="password" class="svg-container"></svg-icon>
-        <el-input v-model="form.password" />
+        <el-input v-model="form.password" :type="passwordType" />
+        <svg-icon
+          :icon="passwordType === 'password' ? 'eye' : 'eye-open'"
+          @click="changeType"
+        ></svg-icon>
       </el-form-item>
       <el-button type="primary" class="login-button" @click="handleLogin"
         >用户登录</el-button
@@ -29,14 +33,17 @@
 
 <script setup>
 import { ref } from "vue";
-import { Edit } from "@element-plus/icons-vue";
+// import { Edit } from "@element-plus/icons-vue";
+import { login } from "@/api/api";
+import { useStore } from "vuex";
+const store = useStore();
 
 const form = ref({
-  name: "",
+  username: "",
   password: "",
 });
 const rules = ref({
-  name: [
+  username: [
     {
       required: true,
       message: "请输入用户名",
@@ -53,14 +60,27 @@ const rules = ref({
 });
 const formRef = ref(null);
 const handleLogin = () => {
-  formRef.value.validate((valid) => {
+  formRef.value.validate(async (valid) => {
     if (valid) {
-      alert("提交成功！");
+      // console.log(login);
+      // alert("提交成功！");
+      // await login(form.value);
+      store.dispatch("app/login", form.value);
+      const { data: res } = await login(form.value);
+      console.log(res);
     } else {
       console.log("提交失败");
       return false;
     }
   });
+};
+const passwordType = ref("password");
+const changeType = () => {
+  if (passwordType.value === "password") {
+    passwordType.value = "text";
+  } else {
+    passwordType.value = "password";
+  }
 };
 </script>
 <style scoped lang="scss">
